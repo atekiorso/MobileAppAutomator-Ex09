@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 public class MainPageObject {
     protected AppiumDriver<WebElement> driver;
@@ -32,12 +33,28 @@ public class MainPageObject {
 
         return template.replace(target, replacement);
     }
+
+    // Подстановка произвольного количества нумерованных параметров в шаблоне, начиная с {SUBSTRING1}
+    protected String replaceSubstringsInTemplate(String template, List<String> replacements) {
+        int replacementIndex = 0;
+        String target;
+        String result = template;
+
+        for (String replacement : replacements) {
+            replacementIndex ++;
+            target = "{" + REPLACEABLE_TEMPLATE_SUBSTRING + replacementIndex + "}";
+            result = result.replace(target, replacement);
+        }
+
+        return result;
+    }
     /* TEMPLATES METHODS */
 
     protected boolean isElementPresent(By by) {
         return isElementPresent(by, DEFAULT_WAITING_TIMEOUT_IN_SECONDS);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected boolean isElementPresent(By by, long timeoutInSeconds) {
         try {
             waitForElementPresent(by, timeoutInSeconds);
@@ -64,6 +81,7 @@ public class MainPageObject {
         return waitForElementAndSendKeys(by, charSequences, DEFAULT_WAITING_TIMEOUT_IN_SECONDS);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected WebElement waitForElementAndSendKeys(By by, String charSequences, long timeoutInSeconds) {
         WebElement element = waitForElementPresent(by, timeoutInSeconds);
         element.clear();
@@ -76,6 +94,7 @@ public class MainPageObject {
         waitForElementAndSwipeLeft(by, DEFAULT_WAITING_TIMEOUT_IN_SECONDS);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected void waitForElementAndSwipeLeft(By by, long timeoutInSeconds) {
         WebElement element = waitForElementPresent(by, timeoutInSeconds);
 
@@ -106,6 +125,7 @@ public class MainPageObject {
         waitForElementNotPresent(by, DEFAULT_WAITING_TIMEOUT_IN_SECONDS);
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected void waitForElementNotPresent(By by, long timeoutInSeconds) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
         wait.withMessage("Элемент, который должен отсутствовать, найден! " + by.toString());
@@ -114,5 +134,16 @@ public class MainPageObject {
 
     protected WebElement findElementWithoutWaiting(By by) {
         return driver.findElement(by);
+    }
+
+    protected List<WebElement> getElements(By by) {
+        return getElements(by, DEFAULT_WAITING_TIMEOUT_IN_SECONDS);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    protected List<WebElement> getElements(By by, long timeoutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.withMessage("Не найдены элементы! " + by.toString());
+        return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(by));
     }
 }
